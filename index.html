@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1a0b2e" />
+<title>Luna — Period Tracker</title>
+<style>
+:root{
+  --glass: rgba(255,255,255,.10);
+  --glass-strong: rgba(255,255,255,.16);
+  --stroke: rgba(255,255,255,.22);
+  --text: #f6f1ff;
+  --muted: rgba(246,241,255,.62);
+  --faint: rgba(246,241,255,.38);
+  --accent: #ff6f9c;
+  --accent-2: #b98cff;
+  --accent-3: #6ee7d7;
+  --radius: 22px;
+  --blur: blur(18px) saturate(160%);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;
+  color:var(--text);
+  background:#150a26;
+  overflow-x:hidden;
+}
+.bg{position:fixed;inset:0;z-index:-2;background:
+  radial-gradient(120% 90% at 15% 0%, #2b1250 0%, #17092b 55%, #0d0518 100%);}
+.blob{position:fixed;z-index:-1;border-radius:50%;filter:blur(70px);opacity:.55;will-change:transform}
+.b1{width:46vmax;height:46vmax;left:-12vmax;top:-14vmax;background:#ff5f8f;animation:f1 22s ease-in-out infinite}
+.b2{width:40vmax;height:40vmax;right:-14vmax;top:8vmax;background:#8a5cff;animation:f2 26s ease-in-out infinite}
+.b3{width:38vmax;height:38vmax;left:22vmax;bottom:-18vmax;background:#2fd4c1;opacity:.35;animation:f3 30s ease-in-out infinite}
+@keyframes f1{50%{transform:translate3d(8vmax,6vmax,0) scale(1.15)}}
+@keyframes f2{50%{transform:translate3d(-7vmax,9vmax,0) scale(1.1)}}
+@keyframes f3{50%{transform:translate3d(5vmax,-8vmax,0) scale(1.2)}}
+@media (prefers-reduced-motion: reduce){.blob{animation:none}}
+
+.wrap{max-width:940px;margin:0 auto;padding:28px 18px 120px}
+
+.glass{
+  background:linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  box-shadow:0 10px 40px rgba(10,0,30,.35), inset 0 1px 0 rgba(255,255,255,.25);
+}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:20px;
+  background:linear-gradient(150deg,rgba(255,111,156,.85),rgba(185,140,255,.7));border:1px solid var(--stroke);
+  box-shadow:0 6px 22px rgba(255,111,156,.35)}
+h1{font-size:19px;margin:0;letter-spacing:.3px;font-weight:650}
+.sub{font-size:12px;color:var(--muted);margin-top:2px}
+.icon-btn{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;cursor:pointer;
+  background:var(--glass);border:1px solid var(--stroke);color:var(--text);font-size:16px;
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);transition:.2s}
+.icon-btn:hover{background:var(--glass-strong);transform:translateY(-1px)}
+
+/* tabs */
+.tabs{display:flex;gap:8px;margin-bottom:18px;padding:5px;border-radius:16px;background:var(--glass);
+  border:1px solid var(--stroke);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.tab{flex:1;text-align:center;padding:10px 14px;border-radius:12px;font-size:13.5px;font-weight:600;cursor:pointer;
+  color:var(--muted);transition:.2s;user-select:none}
+.tab:hover{color:var(--text)}
+.tab.on{background:linear-gradient(135deg,rgba(255,111,156,.85),rgba(185,140,255,.8));color:#fff;
+  box-shadow:0 6px 20px rgba(255,111,156,.3)}
+.view{display:none}
+.view.on{display:block}
+
+.hero{padding:26px;display:flex;gap:28px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.ring{position:relative;width:186px;height:186px;flex:0 0 auto}
+.ring svg{transform:rotate(-90deg);display:block}
+.ring .track{stroke:rgba(255,255,255,.13)}
+.ring .prog{stroke:url(#g1);stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.4,0,.2,1)}
+.ring-mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring-mid .big{font-size:44px;font-weight:700;line-height:1;letter-spacing:-1px}
+.ring-mid .lbl{font-size:11px;letter-spacing:2.4px;color:var(--muted);text-transform:uppercase;margin-top:7px}
+.hero-info{flex:1;min-width:230px}
+.phase{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-size:12.5px;
+  background:var(--glass);border:1px solid var(--stroke);margin-bottom:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.headline{font-size:27px;font-weight:650;line-height:1.22;margin:0 0 6px;letter-spacing:-.4px}
+.hero-note{color:var(--muted);font-size:13.5px;line-height:1.6}
+.hero-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn{padding:11px 18px;border-radius:14px;border:1px solid var(--stroke);cursor:pointer;font-size:13.5px;
+  font-weight:600;color:var(--text);background:var(--glass);backdrop-filter:var(--blur);transition:.2s;font-family:inherit}
+.btn:hover{background:var(--glass-strong);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,rgba(255,111,156,.9),rgba(185,140,255,.85));border-color:rgba(255,255,255,.35);
+  box-shadow:0 8px 26px rgba(255,111,156,.34)}
+.btn.primary:hover{box-shadow:0 12px 32px rgba(255,111,156,.45)}
+
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.hero{gap:20px;padding:20px}.ring{width:150px;height:150px;margin:0 auto}}
+.card{padding:20px}
+.card h2{font-size:13px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin:0 0 16px;font-weight:600}
+
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-title{font-size:16px;font-weight:600}
+.cal-hint{font-size:11.5px;color:var(--faint);margin-top:2px}
+.nav{display:flex;gap:8px}
+.nav button{width:32px;height:32px;border-radius:11px;background:var(--glass);border:1px solid var(--stroke);
+  color:var(--text);cursor:pointer;font-size:14px;transition:.2s}
+.nav button:hover{background:var(--glass-strong)}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.dow span{text-align:center;font-size:10.5px;letter-spacing:1px;color:var(--faint);text-transform:uppercase}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.day{aspect-ratio:1;border-radius:13px;display:grid;place-items:center;position:relative;cursor:pointer;
+  font-size:13.5px;border:1px solid transparent;background:rgba(255,255,255,.045);transition:.16s;color:var(--text)}
+.day:hover{background:rgba(255,255,255,.13);transform:scale(1.06)}
+.day.pad{opacity:0;pointer-events:none;cursor:default}
+.day.today{border-color:rgba(255,255,255,.75);font-weight:700}
+.day.future{color:var(--faint)}
+.day.period{background:linear-gradient(150deg,rgba(255,90,140,.85),rgba(255,120,170,.6));border-color:rgba(255,150,190,.5);font-weight:650;
+  box-shadow:0 4px 16px rgba(255,90,140,.3)}
+.day.pred{background:rgba(255,111,156,.14);border:1px dashed rgba(255,140,180,.55)}
+.day.fertile{background:rgba(110,231,215,.13);border:1px solid rgba(110,231,215,.3)}
+.day.ovu{background:rgba(110,231,215,.3);border:1px solid rgba(110,231,215,.7);font-weight:650}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:11.5px;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:4px;margin-right:6px;vertical-align:-1px}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.stat{padding:15px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13)}
+.stat b{display:block;font-size:25px;font-weight:680;letter-spacing:-.5px}
+.stat span{font-size:11px;color:var(--muted);letter-spacing:.6px}
+
+/* history list */
+.hist-list{display:flex;flex-direction:column;gap:10px}
+.hist-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-radius:16px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);transition:.2s}
+.hist-row:hover{background:rgba(255,255,255,.11)}
+.hist-left{display:flex;align-items:center;gap:14px}
+.hist-num{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:13px;font-weight:700;
+  background:linear-gradient(150deg,rgba(255,111,156,.5),rgba(185,140,255,.4));border:1px solid var(--stroke);flex:0 0 auto}
+.hist-dates{font-size:14.5px;font-weight:600}
+.hist-gap{font-size:11.5px;color:var(--faint);margin-top:2px}
+.hist-days{font-size:13px;color:var(--muted);padding:6px 13px;border-radius:999px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);flex:0 0 auto}
+.empty{color:var(--faint);font-size:13px;line-height:1.6;padding:6px 0}
+
+.mask{position:fixed;inset:0;background:rgba(8,2,20,.55);backdrop-filter:blur(6px);opacity:0;pointer-events:none;
+  transition:.25s;z-index:40}
+.mask.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:50;left:50%;bottom:0;transform:translate(-50%,110%);width:min(480px,100%);
+  padding:24px 22px 28px;border-radius:26px 26px 0 0;transition:transform .34s cubic-bezier(.3,.9,.3,1);max-height:88vh;overflow:auto}
+.sheet.on{transform:translate(-50%,0)}
+@media(min-width:620px){.sheet{bottom:22px;border-radius:26px}.sheet.on{transform:translate(-50%,0)}}
+.sheet h3{margin:0 0 3px;font-size:18px;font-weight:650}
+.sheet .dsub{color:var(--muted);font-size:12.5px;margin-bottom:20px}
+.field{margin-bottom:18px}
+.field>label{display:block;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 14px;border-radius:12px;font-size:12.5px;cursor:pointer;user-select:none;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);transition:.18s}
+.chip:hover{background:rgba(255,255,255,.14)}
+.chip.on{background:linear-gradient(135deg,rgba(255,111,156,.8),rgba(185,140,255,.7));border-color:rgba(255,255,255,.4);font-weight:600}
+.sheet-actions{display:flex;gap:10px;margin-top:6px}
+.sheet-actions .btn{flex:1;text-align:center}
+.danger{color:#ffb3c6}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);padding:12px 20px;border-radius:14px;
+  font-size:13px;z-index:80;transition:transform .3s}
+.toast.on{transform:translate(-50%,0)}
+footer{text-align:center;margin-top:24px;font-size:11.5px;color:var(--faint);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">🌙</div>
+      <div><h1>Luna</h1><div class="sub" id="todayLbl"></div></div>
+    </div>
+    <div style="display:flex;gap:9px">
+      <button class="icon-btn" id="btnSettings" title="Settings">⚙</button>
+      <button class="icon-btn" id="btnData" title="Backup &amp; data">⇅</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab on" data-view="tracker">Tracker</div>
+    <div class="tab" data-view="history">History</div>
+  </div>
+
+  <!-- ============ TRACKER VIEW ============ -->
+  <div class="view on" id="view-tracker">
+    <section class="glass hero">
+      <div class="ring">
+        <svg width="100%" height="100%" viewBox="0 0 200 200">
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ff6f9c"/><stop offset="100%" stop-color="#b98cff"/></linearGradient></defs>
+          <circle class="track" cx="100" cy="100" r="86" fill="none" stroke-width="13"/>
+          <circle class="prog" id="ringProg" cx="100" cy="100" r="86" fill="none" stroke-width="13"
+                  stroke-dasharray="540.4" stroke-dashoffset="540.4"/>
+        </svg>
+        <div class="ring-mid"><div class="big" id="cycleDay">–</div><div class="lbl" id="cycleLbl">Cycle day</div></div>
+      </div>
+      <div class="hero-info">
+        <div class="phase"><span class="dot" id="phaseDot"></span><span id="phaseName">No data yet</span></div>
+        <h2 class="headline" id="headline">Log your first period</h2>
+        <div class="hero-note" id="heroNote">Click a date on the calendar to mark it as a period day. After one full cycle Luna starts predicting.</div>
+        <div class="hero-actions">
+          <button class="btn primary" id="btnToday">Period started today</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass card">
+      <div class="cal-head">
+        <div>
+          <div class="cal-title" id="calTitle"></div>
+          <div class="cal-hint">Click a date to mark or unmark a period day</div>
+        </div>
+        <div class="nav"><button id="prevM">‹</button><button id="todayM">•</button><button id="nextM">›</button></div>
+      </div>
+      <div class="dow"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+      <div class="days" id="days"></div>
+      <div class="legend">
+        <span><i style="background:linear-gradient(150deg,#ff5a8c,#ff78aa)"></i>Period</span>
+        <span><i style="background:rgba(255,111,156,.2);border:1px dashed rgba(255,140,180,.7)"></i>Predicted</span>
+        <span><i style="background:rgba(110,231,215,.2);border:1px solid rgba(110,231,215,.5)"></i>Fertile</span>
+        <span><i style="background:rgba(110,231,215,.45)"></i>Ovulation</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ HISTORY VIEW ============ -->
+  <div class="view" id="view-history">
+    <section class="glass card" style="margin-bottom:18px">
+      <h2>Overview</h2>
+      <div class="stats">
+        <div class="stat"><b id="sAvg">–</b><span>AVG CYCLE</span></div>
+        <div class="stat"><b id="sPer">–</b><span>AVG PERIOD</span></div>
+        <div class="stat"><b id="sRange">–</b><span>VARIATION</span></div>
+        <div class="stat"><b id="sCount">0</b><span>LOGGED</span></div>
+      </div>
+    </section>
+    <section class="glass card">
+      <h2>Period dates</h2>
+      <div class="hist-list" id="histList"></div>
+    </section>
+  </div>
+
+  <footer>Synced to your Supabase project — accessible from any device with this page.<br/>Predictions are estimates, not medical advice.</footer>
+</div>
+
+<div class="mask" id="mask"></div>
+
+<div class="glass sheet" id="setSheet">
+  <h3>Settings</h3>
+  <div class="dsub">Used until Luna has enough of your own history.</div>
+  <div class="field"><label>Default cycle length</label><div class="chips" id="cycChips"></div></div>
+  <div class="field"><label>Default period length</label><div class="chips" id="perChips"></div></div>
+  <div class="sheet-actions"><button class="btn primary" id="setClose">Done</button></div>
+</div>
+
+<div class="glass sheet" id="dataSheet">
+  <h3>Backup &amp; data</h3>
+  <div class="dsub">Your data lives in Supabase. Export a local JSON copy as an extra backup any time.</div>
+  <div class="sheet-actions" style="flex-direction:column">
+    <button class="btn" id="btnExport">⬇ Export JSON backup</button>
+    <button class="btn" id="btnImport">⬆ Import backup</button>
+    <button class="btn" id="btnReset"><span class="danger">Erase all data</span></button>
+    <button class="btn primary" id="dataClose">Close</button>
+  </div>
+  <input type="file" id="fileIn" accept="application/json" hidden />
+</div>
+
+<div class="glass toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- storage: Supabase ---------------- */
+const SUPABASE_URL = "https://xgqkgmwpmkvcgnogpmoj.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhncWtnbXdwbWt2Y2dub2dwbW9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNzAyMDgsImV4cCI6MjEwMzc0NjIwOH0.Hh8RpkvhWVcfZjZ37socFdNagzpENZWdXexjMkmI4UY";
+const REST = SUPABASE_URL + "/rest/v1";
+const LS_CACHE_KEY = "luna.periodTracker.cache.v1";
+const MS_DAY = 86400000;
+
+function sbHeaders(extra){
+  return Object.assign({
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": "application/json"
+  }, extra||{});
+}
+async function sbGet(path){
+  const res = await fetch(REST + path, { headers: sbHeaders() });
+  if(!res.ok) throw new Error("Supabase GET failed: " + res.status);
+  return res.json();
+}
+async function sbUpsertDay(key){
+  const res = await fetch(REST + "/period_days", {
+    method: "POST",
+    headers: sbHeaders({ "Prefer": "resolution=merge-duplicates,return=minimal" }),
+    body: JSON.stringify([{ day: key }])
+  });
+  if(!res.ok) throw new Error("Supabase upsert failed: " + res.status);
+}
+async function sbDeleteDay(key){
+  const res = await fetch(REST + "/period_days?day=eq." + key, {
+    method: "DELETE",
+    headers: sbHeaders({ "Prefer": "return=minimal" })
+  });
+  if(!res.ok) throw new Error("Supabase delete failed: " + res.status);
+}
+async function sbUpdateSettings(cycleLen, periodLen){
+  const res = await fetch(REST + "/app_settings?id=eq.1", {
+    method: "PATCH",
+    headers: sbHeaders({ "Prefer": "return=minimal" }),
+    body: JSON.stringify({ cycle_len: cycleLen, period_len: periodLen })
+  });
+  if(!res.ok) throw new Error("Supabase settings update failed: " + res.status);
+}
+async function sbClearAll(){
+  const res = await fetch(REST + "/period_days?day=not.is.null", {
+    method: "DELETE",
+    headers: sbHeaders({ "Prefer": "return=minimal" })
+  });
+  if(!res.ok) throw new Error("Supabase clear failed: " + res.status);
+  await sbUpdateSettings(28, 5);
+}
+
+function loadCache(){
+  try{
+    const raw = localStorage.getItem(LS_CACHE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { days: {}, settings: { cycleLen: 28, periodLen: 5 } };
+}
+function saveCache(){
+  try{ localStorage.setItem(LS_CACHE_KEY, JSON.stringify(state)); }catch(e){}
+}
+let state = loadCache(); // instant paint from last known data, refreshed from Supabase below
+if(!state.settings) state.settings = { cycleLen: 28, periodLen: 5 };
+if(!state.days) state.days = {};
+
+async function syncFromSupabase(){
+  const [days, settingsRows] = await Promise.all([
+    sbGet("/period_days?select=day"),
+    sbGet("/app_settings?id=eq.1&select=cycle_len,period_len")
+  ]);
+  const dayMap = {};
+  days.forEach(row=>{ dayMap[row.day] = true; });
+  state.days = dayMap;
+  if(settingsRows[0]){
+    state.settings = { cycleLen: settingsRows[0].cycle_len, periodLen: settingsRows[0].period_len };
+  }
+  saveCache();
+}
+
+/* ---------------- date helpers ---------------- */
+function fmt(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), da=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+function parseKey(k){ const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function startOfDay(d){ const r=new Date(d); r.setHours(0,0,0,0); return r; }
+function sameDay(a,b){ return fmt(a)===fmt(b); }
+function daysBetween(a,b){ return Math.round((startOfDay(b)-startOfDay(a))/MS_DAY); }
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const WD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+/* ---------------- derive period "runs" from logged days ---------------- */
+function periodDayKeys(){
+  return Object.keys(state.days).filter(k=>state.days[k]).sort();
+}
+function getRuns(){
+  const keys = periodDayKeys();
+  const runs=[]; let cur=null;
+  keys.forEach(k=>{
+    const d=parseKey(k);
+    if(cur && daysBetween(parseKey(cur.end),d)<=1){ cur.end=k; cur.days.push(k); }
+    else { cur={start:k,end:k,days:[k]}; runs.push(cur); }
+  });
+  return runs;
+}
+function cycleLengths(runs){
+  const out=[];
+  for(let i=1;i<runs.length;i++) out.push(daysBetween(parseKey(runs[i-1].start), parseKey(runs[i].start)));
+  return out;
+}
+function periodLengths(runs){ return runs.map(r=>r.days.length); }
+function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null; }
+
+/* ---------------- prediction model ---------------- */
+function model(){
+  const runs = getRuns();
+  const cLens = cycleLengths(runs);
+  const pLens = periodLengths(runs);
+  const cycleLen = cLens.length ? Math.round(avg(cLens.slice(-6))) : state.settings.cycleLen;
+  const periodLen = pLens.length ? Math.round(avg(pLens.slice(-6))) : state.settings.periodLen;
+  const lastRun = runs.length ? runs[runs.length-1] : null;
+  return { runs, cLens, pLens, cycleLen, periodLen, lastRun };
+}
+function predictedStarts(m, count){
+  const out=[];
+  if(!m.lastRun) return out;
+  let base = parseKey(m.lastRun.start);
+  for(let i=1;i<=count;i++) out.push(addDays(base, m.cycleLen*i));
+  return out;
+}
+
+/* ---------------- current status ---------------- */
+function computeStatus(){
+  const m = model();
+  const today = startOfDay(new Date());
+  if(!m.lastRun) return { hasData:false, m };
+
+  const lastStart = parseKey(m.lastRun.start);
+  const lastEnd = parseKey(m.lastRun.end);
+
+  let diff = daysBetween(lastStart, today);
+  let cycleDay = diff % m.cycleLen;
+  if(cycleDay<0) cycleDay += m.cycleLen;
+  cycleDay += 1;
+
+  const ovuDay = Math.max(1, m.cycleLen-14);
+  const fertileStart = Math.max(1, ovuDay-5);
+  const fertileEnd = ovuDay;
+
+  let phase, headline, note;
+  const nextStart = predictedStarts(m,1)[0];
+  const daysToNext = nextStart ? daysBetween(today, nextStart) : null;
+
+  if(today>=lastStart && today<=lastEnd){
+    phase="Period";
+    const dayOfPeriod = daysBetween(lastStart,today)+1;
+    headline = `Day ${dayOfPeriod} of your period`;
+    note = "Take it easy — Luna is tracking your flow days.";
+  } else if(cycleDay>=fertileStart && cycleDay<=fertileEnd){
+    phase = cycleDay===ovuDay ? "Ovulation" : "Fertile window";
+    headline = cycleDay===ovuDay ? "Estimated ovulation day" : "You're in your fertile window";
+    note = "Estimated from your average cycle — actual ovulation can shift cycle to cycle.";
+  } else if(daysToNext!==null && daysToNext<=2 && daysToNext>=0){
+    phase="Upcoming";
+    headline = daysToNext===0 ? "Period expected today" : `Period expected in ${daysToNext} day${daysToNext===1?"":"s"}`;
+    note = "Based on your average cycle length. Click the date when it starts.";
+  } else {
+    phase="Luteal / follicular";
+    headline = daysToNext!==null ? `${daysToNext} days until your next period` : "Tracking your cycle";
+    note = "Everything's calm right now. Keep logging to sharpen predictions.";
+  }
+
+  return { hasData:true, m, cycleDay, phase, headline, note, nextStart, daysToNext, ovuDay, fertileStart, fertileEnd };
+}
+
+/* ---------------- rendering: hero ---------------- */
+function renderHero(){
+  const s = computeStatus();
+  const cycleDayEl=document.getElementById("cycleDay");
+  const cycleLblEl=document.getElementById("cycleLbl");
+  const phaseName=document.getElementById("phaseName");
+  const headline=document.getElementById("headline");
+  const note=document.getElementById("heroNote");
+  const ring=document.getElementById("ringProg");
+  const CIRC = 2*Math.PI*86;
+
+  if(!s.hasData){
+    cycleDayEl.textContent="–"; cycleLblEl.textContent="No data";
+    phaseName.textContent="No data yet";
+    headline.textContent="Log your first period";
+    note.textContent="Click a date on the calendar to mark it as a period day. After one full cycle Luna starts predicting.";
+    ring.setAttribute("stroke-dasharray", CIRC);
+    ring.style.strokeDashoffset = CIRC;
+    return;
+  }
+  cycleDayEl.textContent = s.cycleDay;
+  cycleLblEl.textContent = `of ~${s.m.cycleLen} day cycle`;
+  phaseName.textContent = s.phase;
+  headline.textContent = s.headline;
+  note.textContent = s.note;
+  const frac = Math.min(1, s.cycleDay / s.m.cycleLen);
+  ring.setAttribute("stroke-dasharray", CIRC);
+  ring.style.strokeDashoffset = CIRC*(1-frac);
+}
+
+/* ---------------- calendar ---------------- */
+let viewDate = startOfDay(new Date());
+
+async function toggleDay(key){
+  const wasSet = !!state.days[key];
+  if(wasSet) delete state.days[key];
+  else state.days[key] = true;
+  saveCache();
+  refreshAll();
+  try{
+    if(wasSet) await sbDeleteDay(key);
+    else await sbUpsertDay(key);
+  }catch(e){
+    // rollback on failure
+    if(wasSet) state.days[key] = true;
+    else delete state.days[key];
+    saveCache();
+    refreshAll();
+    toast("Couldn't reach Supabase — change not saved");
+  }
+}
+
+function renderCalendar(){
+  const year = viewDate.getFullYear(), mon = viewDate.getMonth();
+  document.getElementById("calTitle").textContent = `${MONTHS[mon]} ${year}`;
+
+  const first = new Date(year,mon,1);
+  let startIdx = (first.getDay()+6)%7;
+  const daysInMonth = new Date(year,mon+1,0).getDate();
+
+  const s = computeStatus();
+  const today = startOfDay(new Date());
+
+  const predSet = new Set(), fertileSet=new Set(), ovuSet=new Set();
+  if(s.hasData){
+    const starts = predictedStarts(s.m,3);
+    starts.forEach(st=>{ for(let i=0;i<s.m.periodLen;i++) predSet.add(fmt(addDays(st,i))); });
+    const allStarts = [parseKey(s.m.lastRun.start), ...starts];
+    for(let i=0;i<allStarts.length-1;i++){
+      const nxt = allStarts[i+1];
+      const ovuDate = addDays(nxt, -14);
+      for(let f=-5;f<=0;f++) fertileSet.add(fmt(addDays(ovuDate,f)));
+      ovuSet.add(fmt(ovuDate));
+    }
+  }
+
+  const grid = document.getElementById("days");
+  grid.innerHTML="";
+  for(let i=0;i<startIdx;i++){
+    const pad=document.createElement("div"); pad.className="day pad"; grid.appendChild(pad);
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    const dateObj = new Date(year,mon,d);
+    const key = fmt(dateObj);
+    const el = document.createElement("div");
+    el.className="day";
+    el.textContent = d;
+    el.dataset.key = key;
+
+    if(sameDay(dateObj,today)) el.classList.add("today");
+    if(dateObj>today) el.classList.add("future");
+
+    if(state.days[key]){
+      el.classList.add("period");
+    } else if(predSet.has(key) && dateObj>=today){
+      el.classList.add("pred");
+    } else if(ovuSet.has(key)){
+      el.classList.add("ovu");
+    } else if(fertileSet.has(key)){
+      el.classList.add("fertile");
+    }
+
+    el.addEventListener("click", ()=>toggleDay(key));
+    grid.appendChild(el);
+  }
+}
+document.getElementById("prevM").addEventListener("click", ()=>{ viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1,1); renderCalendar(); });
+document.getElementById("nextM").addEventListener("click", ()=>{ viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1); renderCalendar(); });
+document.getElementById("todayM").addEventListener("click", ()=>{ viewDate=startOfDay(new Date()); renderCalendar(); });
+
+/* ---------------- history view ---------------- */
+function renderStats(){
+  const m = model();
+  document.getElementById("sAvg").textContent = m.cLens.length ? `${m.cycleLen}d` : "–";
+  document.getElementById("sPer").textContent = m.pLens.length ? `${m.periodLen}d` : "–";
+  if(m.cLens.length>=2){
+    const mn=Math.min(...m.cLens), mx=Math.max(...m.cLens);
+    document.getElementById("sRange").textContent = `±${Math.round((mx-mn)/2)}d`;
+  } else document.getElementById("sRange").textContent="–";
+  document.getElementById("sCount").textContent = m.runs.length;
+}
+function renderHistoryList(){
+  const m = model();
+  const list = document.getElementById("histList");
+  list.innerHTML="";
+  if(!m.runs.length){
+    list.innerHTML = `<div class="empty">No periods logged yet. Go to the Tracker tab and click a date to mark it.</div>`;
+    return;
+  }
+  const reversed = m.runs.slice().reverse();
+  reversed.forEach((r,idx)=>{
+    const runNumber = m.runs.length - idx;
+    const startD = parseKey(r.start), endD = parseKey(r.end);
+    const row=document.createElement("div"); row.className="hist-row";
+
+    const left=document.createElement("div"); left.className="hist-left";
+    const num=document.createElement("div"); num.className="hist-num"; num.textContent = "#"+runNumber;
+    const info=document.createElement("div");
+    const dateLbl=document.createElement("div"); dateLbl.className="hist-dates";
+    const sameMonth = startD.getMonth()===endD.getMonth() && startD.getFullYear()===endD.getFullYear();
+    if(r.days.length===1){
+      dateLbl.textContent = startD.toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"});
+    } else if(sameMonth){
+      dateLbl.textContent = `${MONTHS[startD.getMonth()]} ${startD.getDate()}–${endD.getDate()}, ${endD.getFullYear()}`;
+    } else {
+      dateLbl.textContent = `${startD.toLocaleDateString(undefined,{month:"short",day:"numeric"})} – ${endD.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}`;
+    }
+    info.appendChild(dateLbl);
+
+    // gap since previous run (cycle length)
+    if(runNumber>1){
+      const prevRun = m.runs[runNumber-2];
+      const gap = daysBetween(parseKey(prevRun.start), startD);
+      const gapLbl=document.createElement("div"); gapLbl.className="hist-gap";
+      gapLbl.textContent = `${gap} days since previous cycle start`;
+      info.appendChild(gapLbl);
+    }
+
+    left.appendChild(num); left.appendChild(info);
+
+    const days=document.createElement("div"); days.className="hist-days";
+    days.textContent = `${r.days.length} day${r.days.length===1?"":"s"}`;
+
+    row.appendChild(left); row.appendChild(days);
+    list.appendChild(row);
+  });
+}
+
+/* ---------------- settings sheet ---------------- */
+const FLOWS_UNUSED = null;
+let editingKey=null;
+function buildChips(container, options, selectedGetter, onToggle){
+  container.innerHTML="";
+  options.forEach(opt=>{
+    const chip=document.createElement("div");
+    chip.className="chip";
+    chip.textContent=opt;
+    if(selectedGetter().includes(opt)) chip.classList.add("on");
+    chip.addEventListener("click", ()=>{ onToggle(opt); buildChips(container, options, selectedGetter, onToggle); });
+    container.appendChild(chip);
+  });
+}
+const CYC_OPTS=[21,24,26,28,30,32,35];
+const PER_OPTS=[3,4,5,6,7,8];
+function renderSettingsChips(){
+  buildChips(document.getElementById("cycChips"), CYC_OPTS.map(String), ()=>[String(state.settings.cycleLen)], async (opt)=>{
+    state.settings.cycleLen = Number(opt); saveCache(); refreshAll();
+    try{ await sbUpdateSettings(state.settings.cycleLen, state.settings.periodLen); }
+    catch(e){ toast("Couldn't reach Supabase — setting not saved"); }
+  });
+  buildChips(document.getElementById("perChips"), PER_OPTS.map(String), ()=>[String(state.settings.periodLen)], async (opt)=>{
+    state.settings.periodLen = Number(opt); saveCache(); refreshAll();
+    try{ await sbUpdateSettings(state.settings.cycleLen, state.settings.periodLen); }
+    catch(e){ toast("Couldn't reach Supabase — setting not saved"); }
+  });
+}
+document.getElementById("btnSettings").addEventListener("click", ()=>{ renderSettingsChips(); showSheet("setSheet"); });
+document.getElementById("setClose").addEventListener("click", closeSheets);
+
+/* ---------------- quick actions ---------------- */
+document.getElementById("btnToday").addEventListener("click", async ()=>{
+  const key = fmt(new Date());
+  const already = !!state.days[key];
+  state.days[key] = true;
+  saveCache();
+  refreshAll();
+  if(already){ toast("Today is already logged"); return; }
+  try{
+    await sbUpsertDay(key);
+    toast("Logged today as a period day");
+  }catch(e){
+    delete state.days[key]; saveCache(); refreshAll();
+    toast("Couldn't reach Supabase — change not saved");
+  }
+});
+
+/* ---------------- data sheet (export/import/reset) ---------------- */
+document.getElementById("btnData").addEventListener("click", ()=>showSheet("dataSheet"));
+document.getElementById("dataClose").addEventListener("click", closeSheets);
+document.getElementById("btnExport").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=`luna-backup-${fmt(new Date())}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  toast("Backup downloaded");
+});
+document.getElementById("btnImport").addEventListener("click", ()=>document.getElementById("fileIn").click());
+document.getElementById("fileIn").addEventListener("change", (e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async ()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data || typeof data!=="object" || !data.days) throw new Error("bad format");
+      const days = data.days||{};
+      const settings = Object.assign({cycleLen:28,periodLen:5}, data.settings||{});
+      toast("Importing…");
+      const rows = Object.keys(days).filter(k=>days[k]).map(day=>({day}));
+      if(rows.length){
+        const res = await fetch(REST + "/period_days", {
+          method:"POST",
+          headers: sbHeaders({ "Prefer": "resolution=merge-duplicates,return=minimal" }),
+          body: JSON.stringify(rows)
+        });
+        if(!res.ok) throw new Error("import failed: " + res.status);
+      }
+      await sbUpdateSettings(settings.cycleLen, settings.periodLen);
+      await syncFromSupabase();
+      refreshAll(); closeSheets();
+      toast("Backup imported");
+    }catch(err){ toast("Import failed — check the file or your connection"); }
+  };
+  reader.readAsText(file);
+  e.target.value="";
+});
+document.getElementById("btnReset").addEventListener("click", async ()=>{
+  if(confirm("Erase all logged data from Supabase? This can't be undone (export a backup first if you want one).")){
+    try{
+      await sbClearAll();
+      state = { days:{}, settings:{cycleLen:28,periodLen:5} };
+      saveCache(); refreshAll(); closeSheets();
+      toast("All data erased");
+    }catch(e){ toast("Couldn't reach Supabase — nothing was erased"); }
+  }
+});
+
+/* ---------------- sheet plumbing ---------------- */
+function showSheet(id){
+  document.getElementById("mask").classList.add("on");
+  ["setSheet","dataSheet"].forEach(s=>document.getElementById(s).classList.toggle("on", s===id));
+}
+function closeSheets(){
+  document.getElementById("mask").classList.remove("on");
+  ["setSheet","dataSheet"].forEach(s=>document.getElementById(s).classList.remove("on"));
+}
+document.getElementById("mask").addEventListener("click", closeSheets);
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+    tab.classList.add("on");
+    const view = tab.dataset.view;
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
+    document.getElementById("view-"+view).classList.add("on");
+    if(view==="history"){ renderStats(); renderHistoryList(); }
+  });
+});
+
+/* ---------------- toast ---------------- */
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("on"), 2200);
+}
+
+/* ---------------- header date ---------------- */
+function renderHeader(){
+  const now=new Date();
+  document.getElementById("todayLbl").textContent = `${WD[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}`;
+}
+
+/* ---------------- init ---------------- */
+function refreshAll(){
+  renderHeader();
+  renderHero();
+  renderCalendar();
+  if(document.getElementById("view-history").classList.contains("on")){
+    renderStats();
+    renderHistoryList();
+  }
+}
+refreshAll(); // instant paint from cache
+
+syncFromSupabase()
+  .then(()=>refreshAll())
+  .catch(()=>toast("Couldn't reach Supabase — showing last synced data"));
+
+})();
+</script>
+</body>
+</html>
